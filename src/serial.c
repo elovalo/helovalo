@@ -31,9 +31,6 @@
 #include <errno.h>
 #include <unistd.h>
 
-/**
- * Opens serial port and sets speed to any non-standard value.
- */
 int serial_open_raw(const char *dev, int speed)
 {
 	// Open device
