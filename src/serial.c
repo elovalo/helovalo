@@ -28,26 +28,42 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <linux/serial.h>
+#include <errno.h>
+#include <unistd.h>
 
-int open_elovalo(const char *dev, int speed)
+/**
+ * Opens serial port and sets speed to any non-standard value.
+ */
+int serial_open_raw(const char *dev, int speed)
 {
 	// Open device
 	int fd = open(dev, O_RDWR | O_NOCTTY);
-	if (fd == -1) return -1;
+	if (fd == -1) goto not_open;
 
 	// Start with raw values
 	struct termios term;
 	term.c_cflag = B38400 | CS8 | CLOCAL | CREAD; 
 	cfmakeraw(&term);
-        if (tcsetattr(fd,TCSANOW,&term) == -1) return -1;
+        if (tcsetattr(fd,TCSANOW,&term) == -1) goto fail;
 
 	// Then the hack
 	struct serial_struct serial;
-	if(ioctl(fd, TIOCGSERIAL, &serial) == -1) return -1;
-
+	if(ioctl(fd, TIOCGSERIAL, &serial) == -1) goto fail;
 	serial.flags = (serial.flags & ~ASYNC_SPD_MASK) | ASYNC_SPD_CUST;
 	serial.custom_divisor = (serial.baud_base + (speed / 2)) / speed;
 	
-	if(ioctl(fd, TIOCSSERIAL, &serial) == -1) return -1;
+	// Check that the serial timing error is no more than 2%
+	int real_speed = serial.baud_base / serial.custom_divisor;
+	if (real_speed < speed * 98 / 100 || real_speed > speed * 102 / 100) {
+		errno = ENOTSUP;
+		goto fail;
+	}
+
+	// Activate
+	if(ioctl(fd, TIOCSSERIAL, &serial) == -1) goto fail;
 	return fd;
+fail:
+	close(fd);
+not_open:
+	return -1;
 }
