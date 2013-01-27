@@ -5,16 +5,19 @@ import Data.ByteString (ByteString, hPut, pack)
 import Control.Monad (unless,forever)
 import Control.Concurrent (forkIO)
 import System.IO
+import Data.String
 import Data.Word
 import Serial
 import Elovalo
 import ElovaloInternal
 
+-- Geometry and bitsPerVoxel are hardcoded, too.
 frameLen = 768
 
 initElocmd :: FilePath -> IO Elovalo
 initElocmd f = do
-  -- Open connection and enter frame mode
+  -- Open connection and enter frame mode. TODO listen geometry
+  -- information, too.
   h <- openSerialRaw f 250000
   hPutStr h "~F"
   hFlush h
@@ -30,7 +33,11 @@ initElocmd f = do
     waitFlip h
     -- Enable receiver
     emptyData var
-  return Elovalo{ sendFrame = sendEloFrame var }
+  return Elovalo{ sendFrame = sendEloFrame var
+                , geometry = (8,8,8)
+                , bitsPerVoxel = 12
+                , displayType = Greyscale
+                }
 
 waitFlip h = dropUntilM (hGetChar h) '%'
 
@@ -52,4 +59,3 @@ sendEloFrame :: DataVar ByteString -> Frame -> IO ()
 sendEloFrame var frame = pushData var $
                          pack $
                          escape frameLen frame
-
