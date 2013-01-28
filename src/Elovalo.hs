@@ -8,7 +8,7 @@ type Frame = ByteString
 data DisplayType = Greyscale
 
 data Elovalo = Elovalo { sendFrame    :: Frame -> IO ()
-                       , geometry     :: (Word8,Word8,Word8)
+                       , geometry     :: (Int,Int,Int)
                        , bitsPerVoxel :: Int -- ^ Bits per voxel, range: 1-16
                        , displayType  :: DisplayType
                        }

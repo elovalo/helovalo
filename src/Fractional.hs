@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 -- |Fractional value to Frame conversions
-module Floating where
+module Fractional where
 
 import Data.Binary.Put (runPut)
 import Data.Binary.Bits.Put
