@@ -10,6 +10,7 @@ import Data.Word
 import Serial
 import Elovalo
 import ElovaloInternal
+import ByteStringDeep
 
 -- Geometry and bitsPerVoxel are hardcoded, too.
 frameLen = 768
@@ -58,5 +59,6 @@ ensureLength n xs = if B.length xs == n
 -- |Sends frame. Blocks if another frame is in transmit.
 sendEloFrame :: DataVar ByteString -> Frame -> IO ()
 sendEloFrame var frame = pushData var $
+                         force $
                          escape $
                          ensureLength frameLen frame
