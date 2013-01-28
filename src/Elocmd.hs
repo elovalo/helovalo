@@ -1,7 +1,7 @@
 -- |Module for accessing Elocmd variant of Elovalo
 module Elocmd (initElocmd) where
 
-import Data.ByteString (ByteString, hPut, pack)
+import Data.ByteString.Lazy as B hiding (hPutStr)
 import Control.Monad (unless,forever)
 import Control.Concurrent (forkIO)
 import System.IO
@@ -47,15 +47,16 @@ dropUntilM a c = do
   x <- a
   unless (x == c) (dropUntilM a c)
 
--- |Does frame escaping
-escape :: Int -> [Word8] -> [Word8]
-escape 0 []        = []
-escape n (0x7e:xs) = 0x7e:0x00:escape (n-1) xs
-escape n (x:xs)    = x:escape (n-1) xs
-escape _ _ = error "Bad frame length" -- FIXME use exception instead
+-- |Does frame escaping by replacing hex byte 7E with bytes 7E 00
+escape :: ByteString -> ByteString
+escape xs = intercalate (pack [0x7e,0x00]) $ split 0x7e xs
+
+ensureLength n xs = if B.length xs == n
+                    then xs
+                    else error "Bad frame length" -- FIXME use exception instead
 
 -- |Sends frame. Blocks if another frame is in transmit.
 sendEloFrame :: DataVar ByteString -> Frame -> IO ()
 sendEloFrame var frame = pushData var $
-                         pack $
-                         escape frameLen frame
+                         escape $
+                         ensureLength frameLen frame
