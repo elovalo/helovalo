@@ -18,10 +18,15 @@ emptyData = atomically . (flip writeTVar Nothing)
 peekData :: DataVar a -> IO a
 peekData var = atomically $ readTVar var >>= maybe retry return
 
+pushData var new = atomically $ pushData' var new
+
 -- |Pushes frame data to TVar if it is empty.
-pushData :: DataVar a -> a -> IO ()
-pushData var new = atomically $ do
+pushData' :: DataVar a -> a -> STM ()
+pushData' var new = do
   cur <- readTVar var 
   case cur of
     Nothing -> writeTVar var $ Just new
     Just _  -> retry
+
+hasData :: DataVar a -> a -> IO Bool
+hasData var new = atomically $ (pushData' var new >> return True) `orElse` (return False)

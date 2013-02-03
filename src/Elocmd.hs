@@ -52,13 +52,15 @@ dropUntilM a c = do
 escape :: ByteString -> ByteString
 escape xs = intercalate (pack [0x7e,0x00]) $ split 0x7e xs
 
+-- |Sends frame. Blocks if another frame is in transmit.
+sendEloFrame :: DataVar ByteString -> Frame -> IO ()
+sendEloFrame var frame = pushData var $ prepareFrame frame
+
+-- |Prepares frame for transmit. Performs length validation, escapes
+-- content "by the book" and evaluates contents deeply.
+prepareFrame :: ByteString -> ByteString
+prepareFrame = force . escape . ensureLength frameLen
+
 ensureLength n xs = if B.length xs == n
                     then xs
                     else error "Bad frame length" -- FIXME use exception instead
-
--- |Sends frame. Blocks if another frame is in transmit.
-sendEloFrame :: DataVar ByteString -> Frame -> IO ()
-sendEloFrame var frame = pushData var $
-                         force $
-                         escape $
-                         ensureLength frameLen frame
