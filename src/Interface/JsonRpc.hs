@@ -4,7 +4,6 @@ module Interface.JsonRpc where
 import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Resource
-import System.IO.Unsafe (unsafePerformIO) -- TEMPORARY HACK
 import Data.Conduit
 import Network.Wai
 import Network.Wai.Handler.Warp
@@ -27,8 +26,8 @@ process elo r = case process' elo r of
   Left x  -> return $ notOk x
   Right p -> do
     frame <- requestBody r $$ sinkParser p
-    --liftIO $ sendFrame elo frame
-    (unsafePerformIO $ sendFrame elo frame) `seq` return $ ok
+    liftIO $ sendFrame elo frame
+    return ok
 
 -- |Validates headers and returns parser for the payload
 process' :: Elovalo -> Request -> Either String (A.Parser Frame)

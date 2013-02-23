@@ -27,4 +27,13 @@ executable elovalod
     directory >= 1.0.1.1,
     filepath >= 1.2.0.1,
     stm >= 2.2.0.1,
-    unix >= 2.5.1.0
+    unix >= 2.5.1.0,
+    aeson >= 0.6.0.0,
+    blaze-builder >= 0.3.1.0,
+    attoparsec >= 0.10.1.1,
+    attoparsec-conduit >= 0.2.0,
+    http-types >= 0.6.9,
+    warp >= 1.1.0.1,
+    wai >= 1.1.0.1,
+    conduit >= 0.2.0,
+    transformers >= 0.3.0.0
