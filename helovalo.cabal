@@ -36,4 +36,4 @@ executable elovalod
     warp >= 1.1.0.1,
     wai >= 1.1.0.1,
     conduit >= 0.2.0,
-    transformers >= 0.3.0.0
+    transformers >= 0.2.2.0

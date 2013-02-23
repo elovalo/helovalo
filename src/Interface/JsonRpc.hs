@@ -3,7 +3,6 @@ module Interface.JsonRpc where
 
 import Control.Monad
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Resource
 import Data.Conduit
 import Network.Wai
 import Network.Wai.Handler.Warp
